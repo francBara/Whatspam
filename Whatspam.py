@@ -59,6 +59,9 @@ if (main == "spam"):
     while (name == "" and index == -1):
         print("Insert the target name")
         name = input()
+    while (msg == ""):
+        print("Insert a message")
+        msg = input()
 
     #CHANGE THIS VALUE TO SET YOUR BROWSER AND LOCATE YOUR WEBDRIVER (you can download the webdriver from the links at https://selenium-python.readthedocs.io/installation.html)
     #Currently using a Firefox webdriver located in /usr/bin
