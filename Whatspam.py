@@ -38,7 +38,7 @@ commands = options(argv)
 
 main = commands[0]
 
-while (main = ""):
+while (main == ""):
     print("Insert a command, or type help")
     main = input()
 
