@@ -123,6 +123,8 @@ except:
     
     wait(browser, 30).until(EC.presence_of_element_located((By.XPATH, "//span[@class='%s']" %(CONTACT))))
 
+    time.sleep(0.2)
+
     spamSession.spam()
 
 
