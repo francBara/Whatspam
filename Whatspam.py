@@ -17,15 +17,20 @@ CONTACT = 'ggj6brxn gfz4du6o r7fjleex g0rxnol2 lhj4utae le5p0ye3 l7jjieqr i0jNr'
 SEARCH_FIELD = '_13NKt copyable-text selectable-text'
 
 class SpamSession:
-    def __init__(self, name, message, spams, delay):
+    def __init__(self, name, message, spams, delay, safeMode):
         self.name = name
         self.message = message
         self.spams = spams
         self.delay = delay
+        self.safeMode = safeMode
 
     def spam(self):
         getContact(self.name).click()
         textField = browser.find_element(By.XPATH, "//div[@class='%s' and @data-tab='10']" %(MESSAGE_FIELD))
+
+        if (self.safeMode):
+            print("Target found, press enter to start spamming")
+            input()
 
         if (self.delay > 0):
             delay = self.delay / 1000;
@@ -68,12 +73,14 @@ def displayHelp():
     print()
     print("Optional:")
     print("-d | The delay between each message in milliseconds")
+    print("-sm | Messages will require a confirm before being sent")
 
 def options(inputLine):
     name = ""
     message = ""
     spams = 0
     delay = 0
+    safeMode = False
 
     for i in range(1, len(inputLine)):
         if (inputLine[i] == '-msg'):
@@ -84,14 +91,21 @@ def options(inputLine):
             name = inputLine[i + 1]
         elif (inputLine[i] == '-d'):
             delay = int(inputLine[i + 1])
+        elif (inputLine[i] == '-sm'):
+            safeMode = True
         i += 1
 
     if (name == "" or message == "" or spams <= 0 or delay < 0):
         raise(Exception())
 
-    return SpamSession(name, message, spams, delay)
+    return SpamSession(name, message, spams, delay, safeMode)
 
 def getContact(name):
+    #try:
+    #    return browser.find_element(By.XPATH, "//span[@title='%s']" %(name))
+    #except:
+    #    return browser.find_element(By.XPATH, "//span[contains(@title, '%s')]" %(name))
+
     try:
         return browser.find_element(By.XPATH, "//span[@class='%s' and @title='%s']" %(CONTACT, name))
     except:
@@ -106,7 +120,11 @@ except:
     displayHelp()
     exit()
 
-browser = wb.Chrome(executable_path = os.getcwd() + '/chromedriver.exe')
+try:
+    browser = wb.Chrome(executable_path = os.getcwd() + '/chromedriver.exe')
+except:
+    print("Couldn't open the browser, you probably don't have the correct chromedriver, you can download it at https://chromedriver.chromium.org/downloads")
+    exit()
 
 browser.get("https://web.whatsapp.com/")
 
@@ -123,14 +141,19 @@ except:
     
     wait(browser, 30).until(EC.presence_of_element_located((By.XPATH, "//span[@class='%s']" %(CONTACT))))
 
-    time.sleep(0.2)
+    attempts = 0
 
-    spamSession.spam()
-
+    while attempts < 5:
+        try:
+            spamSession.spam()
+            break
+        except:
+            time.sleep(1)
+            attempts += 1
 
 print("All message sent, press ENTER to close the browser")
 input()
 
-
+browser.close()
 
 
