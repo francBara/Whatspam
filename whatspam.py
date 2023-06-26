@@ -12,9 +12,9 @@ import os
 
 #The class names of useful html divs and spans, they are often changed by Meta
 
-MESSAGE_FIELD = 'fd365im1 to2l77zo bbv8nyr4 mwp4sxku gfz4du6o ag5g9lrv'
-CONTACT = 'ggj6brxn gfz4du6o r7fjleex g0rxnol2 lhj4utae le5p0ye3 l7jjieqr i0jNr'
-SEARCH_FIELD = '_13NKt copyable-text selectable-text'
+MESSAGE_FIELD = 'to2l77zo gfz4du6o ag5g9lrv bze30y65 kao4egtt'
+CONTACT = 'ggj6brxn gfz4du6o r7fjleex g0rxnol2 lhj4utae le5p0ye3 l7jjieqr _11JPr'
+SEARCH_FIELD = 'selectable-text copyable-text iq0m558w'
 
 class SpamSession:
     def __init__(self, name, message, spams, delay, safeMode):
@@ -78,7 +78,7 @@ def displayHelp():
 def options(inputLine):
     name = ""
     message = ""
-    spams = 0
+    spams = 1
     delay = 0
     safeMode = False
 
