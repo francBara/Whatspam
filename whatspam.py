@@ -8,10 +8,13 @@ from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
 import time
 import os
+import requests
+from sys import platform
 
+
+VERSIONS_API = "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json"
 
 #The class names of useful html divs and spans, they are often changed by Meta
-
 MESSAGE_FIELD = 'to2l77zo gfz4du6o ag5g9lrv bze30y65 kao4egtt'
 CONTACT = 'ggj6brxn gfz4du6o r7fjleex g0rxnol2 lhj4utae le5p0ye3 l7jjieqr _11JPr'
 SEARCH_FIELD = 'selectable-text copyable-text iq0m558w'
@@ -101,59 +104,79 @@ def options(inputLine):
     return SpamSession(name, message, spams, delay, safeMode)
 
 def getContact(name):
-    #try:
-    #    return browser.find_element(By.XPATH, "//span[@title='%s']" %(name))
-    #except:
-    #    return browser.find_element(By.XPATH, "//span[contains(@title, '%s')]" %(name))
-
     try:
         return browser.find_element(By.XPATH, "//span[@class='%s' and @title='%s']" %(CONTACT, name))
     except:
         return browser.find_element(By.XPATH, "//span[@class='%s' and contains(@title, '%s')]" %(CONTACT, name))
-
-
-
-spamSession = None
-try:
-    spamSession = options(argv)
-except:
-    displayHelp()
-    exit()
-
-try:
-    browser = wb.Chrome(executable_path = os.getcwd() + '/chromedriver.exe')
-except:
-    print("Couldn't open the browser, you probably don't have the correct chromedriver, you can download it at https://chromedriver.chromium.org/downloads")
-    exit()
-
-browser.get("https://web.whatsapp.com/")
-
-#Wating the QR Code scan
-wait(browser, 50).until(EC.presence_of_element_located((By.XPATH, "//span[@class='%s']" %(CONTACT))))
-
-
-try:
-    spamSession.spam()
-except:
-    searchBar = browser.find_element(By.XPATH, "//div[@class='%s' and @data-tab='3']" %(SEARCH_FIELD))
-    searchBar.clear()
-    searchBar.send_keys(spamSession.name)
     
-    wait(browser, 30).until(EC.presence_of_element_located((By.XPATH, "//span[@class='%s']" %(CONTACT))))
 
-    attempts = 0
+def getLatestChromedriver():
+    versions = requests.get(VERSIONS_API).json()
 
-    while attempts < 5:
+    chromedriver_url = ''
+
+    for x in versions['channels']['Stable']['downloads']['chromedriver']:
+        if (x['platform'] == 'win64'):
+            chromedriver_url = x['url']
+
+    f = open("chromedriver", "wb")
+
+    chromedriver = requests.get(chromedriver_url).content
+
+    f.write(chromedriver)
+    f.close()
+
+
+
+if __name__ == "__main__":
+
+    spamSession = None
+    
+    try:
+        spamSession = options(argv)
+    except:
+        displayHelp()
+        exit()
+
+    try:
+        browser = wb.Chrome(executable_path = os.getcwd() + '/chromedriver')
+    except:
+        print("Downloading most recent chromedriver...")
+        getLatestChromedriver()
         try:
-            spamSession.spam()
-            break
+            browser = wb.Chrome(executable_path = os.getcwd() + '/chromedriver')
         except:
-            time.sleep(1)
-            attempts += 1
+            print("Couldn't open the browser, you probably don't have the most recent Google Chrome version, please update Google Chrome.")
+            exit()
 
-print("All message sent, press ENTER to close the browser")
-input()
+    browser.get("https://web.whatsapp.com/")
 
-browser.close()
+    #Wating the QR Code scan
+    wait(browser, 50).until(EC.presence_of_element_located((By.XPATH, "//span[@class='%s']" %(CONTACT))))
+
+
+    try:
+        spamSession.spam()
+    except:
+        searchBar = browser.find_element(By.XPATH, "//div[@class='%s' and @data-tab='3']" %(SEARCH_FIELD))
+        searchBar.clear()
+        searchBar.send_keys(spamSession.name)
+        
+        wait(browser, 30).until(EC.presence_of_element_located((By.XPATH, "//span[@class='%s']" %(CONTACT))))
+
+        attempts = 0
+
+        while attempts < 5:
+            try:
+                spamSession.spam()
+                break
+            except:
+                time.sleep(1)
+                attempts += 1
+
+    print("All message sent, press ENTER to close the browser")
+    input()
+
+    browser.close()
 
 
